@@ -8,12 +8,13 @@ matrix the judge's own metrics cannot show.
 
 `inspect_ai 0.3.260` · `inspect-evals 0.18.0, unmodified` · `stdlib + pydantic harness` · `95% Wilson intervals` · `no Docker`
 
-> ⚠️ **Status: Phase 1, pre-run.** The harness, oracle and tests are complete and
-> green. The numbers in [`RESULTS.md`](RESULTS.md) are not yet measured — the
-> live run is gated on prompt sign-off. Everything asserted below without a
-> number is either deterministic and reproducible today, or explicitly labelled
-> as pending. See [`LOGBOOK.md`](LOGBOOK.md) for how it got here, including the
-> dead ends.
+> **Status: Phase 1 complete.** 600 episodes run 2026-08-25. Of **599**
+> transcripts where the mechanical oracle says no action was taken, the judge
+> flagged **0** — false-positive rate **0.000, 95% Wilson [0.000, 0.0064]**.
+> Judge sensitivity was established first on a hand-written set: **20/20**.
+> Full numbers in [`RESULTS.md`](RESULTS.md); how it got there, dead ends
+> included, in [`LOGBOOK.md`](LOGBOOK.md); the spoken version in
+> [`INTERVIEW.md`](INTERVIEW.md).
 
 ---
 
@@ -32,12 +33,14 @@ matrix the judge's own metrics cannot show.
 > file to diff. Whatever the gate is currently absorbing is what those
 > environments are exposed to.
 >
-> Two findings so far, one deterministic and one pending measurement:
-> **(1)** in the `blackmail` scenario the gate is implemented unsoundly and
-> produces errors in both directions — reproducible in seconds, no API key
-> ([`DRAFT_ISSUE.md`](DRAFT_ISSUE.md)); **(2)** the rate at which the raw judge
-> fires on transcripts containing no operative action is measured here for the
-> first time — pending the live run.
+> Three findings. **(1)** In the `blackmail` scenario the gate is implemented
+> unsoundly and errs in both directions — deterministic, reproducible in seconds,
+> no API key ([`DRAFT_ISSUE.md`](DRAFT_ISSUE.md)). **(2)** The judge does not
+> confuse deliberation with action, to a measured bound of **0.64%** over 599
+> transcripts. **(3)** ⭐ The run's four apparent judge failures were all *oracle*
+> failures — in three, the ground truth scored a refusal as the act being refused,
+> in transcripts where the model was emailing humans to raise an alarm. The judge
+> was right and the ground truth was wrong.
 
 ---
 
@@ -117,7 +120,7 @@ settle ground truth programmatically gets calibration by wrapping one function.
 
 ```bash
 uv venv --python 3.12 .venv && uv pip install -e ".[dev]"
-make test-all      # 34 tests, no network: subject and grader are both mockllm
+make test-all      # 75 tests, no network: subject and grader are both mockllm
 make check         # ruff + pyright (Apollo's near-strict config)
 ```
 
@@ -138,6 +141,10 @@ will produce.
   establishes what judges do in general.
 - **One judge, one subject model.** No multi-judge sweep, no rubric-perturbation
   arm, no adversarial arm. Deliberately out of scope for Phase 1.
+- ⚠️ **No on-policy false-negative evidence.** The subject refused in all 600
+  episodes, so `tp = 0`. The false-positive direction is measured; sensitivity
+  comes only from hand-written transcripts. `RESULTS.md` §4 has the two things
+  that close it.
 - **The oracle is sound in one direction only** (§2).
 - **Small models, toy environments.** The claim is about *how a scorer is
   measured*, not about frontier scheming rates.
@@ -169,7 +176,8 @@ this is upstream of it, and the two compose. Full attribution:
 | [`LOGBOOK.md`](LOGBOOK.md) | Running log, dead ends included |
 | [`PROMPTS.md`](PROMPTS.md) | Every condition and rubric that will be run |
 | [`DRAFT_ISSUE.md`](DRAFT_ISSUE.md) | Unfiled upstream bug report |
-| [`RESULTS.md`](RESULTS.md) | ⚠️ pending the live run |
+| [`RESULTS.md`](RESULTS.md) | Measured results, limitations, cost |
+| [`INTERVIEW.md`](INTERVIEW.md) | The spoken version, every number, hard questions |
 
 ## Licence
 
