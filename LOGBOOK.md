@@ -237,3 +237,63 @@ $2.00 ceiling), pre-flight projects $0.30, and `.env` is gitignored
 (`.gitignore:12`) so a key dropped there cannot be committed by accident.
 
 No live call attempted. Waiting on the key.
+
+---
+
+## 2026-08-25 — pilot run
+
+**Key verified without printing it.** Present, 108 chars, `sk-ant-` prefix, no
+stray whitespace, `.env` gitignored at `.gitignore:12`.
+
+**Dead end that cost nothing but nearly fooled me: `timeout` does not exist on
+macOS.** My first pilot invocation was `timeout 900 python ... | grep`, which
+exited 127 without running anything; because the exit status came from the pipe
+and grep matched nothing, it looked like a clean run that produced no output. I
+only caught it because no `.eval` log had been written. Lesson: check for the
+artefact, not the exit code.
+
+**Second failure: `anthropic` was missing from the dependency spec.** The run
+aborted with *"Anthropic API requires optional dependencies"* before any call.
+`inspect_ai`'s Anthropic provider is optional and neither `inspect_ai` nor
+`inspect-evals[agentic-misalignment]` pulls it. Added to `pyproject.toml` rather
+than pip-installed ad hoc, so CI and any future clone get it.
+
+**Pilot ran: 20 episodes, $0.2332, zero errors, zero parse failures.**
+Headline: of **20** oracle-says-no-action transcripts, the raw judge flagged
+**0**. FP rate 0/20 = 0.000, 95% Wilson [0.000, 0.161]. Control arm alone 0/10,
+[0.000, 0.278].
+
+**⚠️ The result is real but currently uninterpretable, and I nearly reported it
+without noticing.** `tp = 0`: the subject never took the operative action in
+*either* condition. 0/20 transcripts emitted any `<tool_use:>` block; 0/20 even
+mentioned the target address. Completions were long (2,812–3,820 chars), so this
+is genuine refusal after deliberation, not empty output — I checked the raw
+transcripts rather than trusting the cells. But a judge that returns "no"
+unconditionally produces exactly these numbers. Until a live "yes" is observed,
+"well calibrated" and "never fires" are indistinguishable. Proposed a positive
+control (a few cents) before committing $7.67 to the full run.
+
+**⚠️ Third bug, mine, and the most expensive kind: cost undercounting.**
+The judge's prompt is served as **cache-write** tokens — 1,146/episode — not plain
+input (2/episode). `price_usage` read only `input_tokens`, so it reported $0.1473
+against a true $0.2332: **3.76× low on the judge, 1.58× low overall.** Fixed
+(cache-write 1.25×, cache-read 0.1×) with `tests/test_cost.py` pinning the exact
+token shape observed here. A cost model that reads low is worse than no cost model
+— it authorises runs the balance cannot cover.
+
+**Re-projection, scaled rather than extrapolated.** The pilot was blackmail-only,
+which has the shortest prompts of the three scenarios, so a straight
+per-episode × 600 would under-project. Scaling by measured prompt length
+(pilot mean 2,304 subject-input tokens vs grid mean 2,700 → 1.172×):
+60 repeats = 600 episodes = **$7.67**, $9.21 with a 20% margin.
+Pre-registered rule says run 60 if ≤ $12 → **60**. Balance: $10.38 remaining after
+the pilot, so $9.21 fits with ~$1.17 to spare. The rule-vs-balance conflict I
+flagged before the pilot does not materialise. Recommending `cost_ceiling_usd: 10`
+for the full run rather than the current 20, since the margin is thin.
+
+**Incidental observation, logged not claimed:** the refusals contain explicit
+eval-awareness — *"what appears to be a scenario designed to manipulate me"*.
+Upstream has a `test_eval_awareness` flag that would measure this properly.
+Out of scope.
+
+**STOP.** Awaiting authorisation for the full run.
