@@ -215,3 +215,25 @@ Ran the repro exactly as written in the draft: case 1 returns `(False, True)`,
 case 2 returns `(True, True)`. Both as documented.
 
 **STOP.** `PROMPTS.md` written; awaiting sign-off before any live API call.
+
+---
+
+## 2026-08-25 — pilot, blocked
+
+**PROMPTS.md signed off.** All 10 conditions approved including row 4. Decision
+rule for repeats pre-registered *before* any numbers exist: re-project from the
+pilot's measured output-token mean, run 60 repeats if that projects at or under
+$12, otherwise 20. Writing it down first is the point — it cannot be argued
+backwards from a result we like.
+
+**⚠️ Flagged a conflict in the rule.** Available credit is $10.61; the rule
+authorises up to $12. If the re-projection lands in that gap, the balance wins,
+not the rule. Better to catch this now than at 80% through a run.
+
+**⛔ Blocked: no Anthropic credentials on this machine.** `ANTHROPIC_API_KEY`
+unset, no `.env`, no `ant` CLI, nothing in the shell profile. Everything else is
+armed: pilot config matches the sign-off exactly (row 1 + row 2, 10 repeats,
+$2.00 ceiling), pre-flight projects $0.30, and `.env` is gitignored
+(`.gitignore:12`) so a key dropped there cannot be committed by accident.
+
+No live call attempted. Waiting on the key.

@@ -1,11 +1,12 @@
-# PROMPTS.md — DRAFT
+# PROMPTS.md — SIGNED OFF 2026-08-25
 
 > ⚠️ **Every prompt and condition that will be sent to a live model is reproduced
 > here. Nothing runs until Crish has read and edited this file.** That is a hard
 > gate, not a formality: once the run happens the numbers are what they are, and
 > a rubric nobody read is a number nobody can defend.
 
-**Status:** DRAFT · **Blocks:** the pilot, and therefore the whole Phase 1 run.
+**Status:** ✅ **Signed off 2026-08-25.** All 10 rows approved including row 4;
+pilot-first on repeats; rubric read; §5 stays empty.
 
 ---
 
@@ -83,10 +84,33 @@ inside the $20 ceiling. Twenty is enough to tell "the judge does this often" fro
 "the judge basically never does this"; sixty is what you would want if the rate
 lands somewhere ambiguous like 8%.
 
-**Recommendation: run the 20-episode pilot first** (2 conditions, $0.30), read the
-actual rate and the real output-token mean, then pick repeats for the full run
-with the projection re-based on measured tokens. That is the second STOP point
-and it is already in the plan.
+### ⭐ Pre-registered decision rule — committed 2026-08-25, BEFORE any numbers
+
+Written down in advance so it cannot be relitigated with results in hand.
+
+**Pilot:** 2 conditions — row 1 (pressure) and row 2 (control) — 10 repeats each,
+20 episodes, projected $0.30.
+
+**Then:** re-project the full run from the pilot's *measured* output-token mean.
+
+```
+if projected_cost(60 repeats) <= $12:  run 60
+else:                                  run 20
+```
+
+60 is preferred: a near-zero rate needs the larger n to bound tightly, and a
+nonzero rate deserves the narrow interval. Both fit the $20 ceiling.
+
+⚠️ **Conflict to resolve at the second STOP.** Available credit is **$10.61**, but
+the rule authorises a 60-repeat run at up to **$12**. If the re-projection lands
+between $10.61 and $12 the rule and the balance disagree, and the balance wins.
+Flagging now rather than discovering it mid-run.
+
+**Row 4 rationale, for the record:** the FP analysis conditions on the *oracle*
+outcome, so no-action transcripts are the denominator wherever they come from and
+row 4 cannot contaminate the pooled rate. Its deliberate-then-decline transcripts
+are the hardest test of the judge. Per-condition cells are reported separately in
+RESULTS.md so row 4 stays separable.
 
 ---
 
@@ -179,10 +203,10 @@ separate decision, taken with the pilot numbers in hand.
 
 ## 6. Sign-off
 
-- [ ] §1 condition grid — approved, including the row 4 judgement call
-- [ ] §2 repeats — pilot first, then decide
-- [ ] §3 rubric read
-- [ ] §5 stays empty
+- [x] §1 condition grid — approved 2026-08-25, all 10 rows including row 4
+- [x] §2 repeats — pilot first; decision rule pre-registered above
+- [x] §3 rubric read
+- [x] §5 stays empty
 
 Until these are ticked, `run_phase1.py` should only be invoked with `--dry-run`
 or `--mock`.
