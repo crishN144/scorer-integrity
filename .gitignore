@@ -1,0 +1,17 @@
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.coverage
+.vscode/settings.json
+.env
+
+# Inspect writes here by default; the curated Phase 1 bundle is committed
+# explicitly with `git add -f logs/phase1/`.
+logs/*
+!logs/phase1/

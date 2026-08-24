@@ -1,0 +1,88 @@
+[project]
+name = "scorer-integrity"
+version = "0.1.0"
+description = "Measuring how much load the mechanical gates on LLM judges actually carry"
+requires-python = ">=3.12"
+readme = "README.md"
+license = { file = "LICENSE" }
+dependencies = [
+    "inspect-ai==0.3.260",
+    "inspect-evals[agentic-misalignment]==0.18.0",
+    "pydantic",
+    "pyyaml",
+    "fire",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff",
+    "pyright",
+    "pre-commit",
+    "pytest",
+]
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["scorer_integrity", "scorer_integrity.scripts"]
+
+# ---------------------------------------------------------------------------
+# ruff + pyright blocks below follow ApolloResearch/sample verbatim, so this
+# repo passes the same checks Apollo's own template enforces. See RECON.md §1.
+# ---------------------------------------------------------------------------
+
+[tool.ruff]
+line-length = 100
+fix = true
+
+[tool.ruff.lint]
+select = [
+    # pycodestyle
+    "E",
+    # Pyflakes
+    "F",
+    # pyupgrade
+    "UP",
+    # flake8-bugbear
+    "B",
+    # flake8-simplify
+    "SIM",
+    # isort
+    "I",
+]
+
+[tool.ruff.format]
+# Enable reformatting of code snippets in docstrings.
+docstring-code-format = true
+
+[tool.pyright]
+include = ["scorer_integrity", "tests"]
+# Not in Apollo's template: they use a plain pip env, we use uv (RECON.md §1).
+venvPath = "."
+venv = ".venv"
+
+strictListInference = true
+strictDictionaryInference = true
+strictSetInference = true
+reportFunctionMemberAccess = true
+reportUnknownParameterType = true
+reportIncompatibleMethodOverride = true
+reportIncompatibleVariableOverride = true
+# Apollo's template lists reportInconsistentConstructorType and
+# reportShadowedImports; current pyright no longer recognises either name and
+# warns on every run. Kept here commented rather than silently dropped.
+# reportInconsistentConstructorType = true
+reportOverlappingOverload = true
+reportConstantRedefinition = true
+reportImportCycles = true
+reportPropertyTypeMismatch = true
+reportMissingTypeArgument = true
+reportUnnecessaryCast = true
+reportUnnecessaryComparison = true
+reportUnnecessaryContains = true
+reportUnusedExpression = true
+reportMatchNotExhaustive = true
+# reportShadowedImports = true
+reportPrivateImportUsage = false
