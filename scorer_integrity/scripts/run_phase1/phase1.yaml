@@ -11,9 +11,9 @@ seed: 0
 run:
   subject_model: anthropic/claude-haiku-4-5
   grader_model: anthropic/claude-sonnet-4-6
-  epochs: 20
+  epochs: 60
   max_connections: 10
-  cost_ceiling_usd: 20.0
+  cost_ceiling_usd: 10.0
 
 rates:
   anthropic/claude-haiku-4-5:

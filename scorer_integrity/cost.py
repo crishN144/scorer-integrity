@@ -96,8 +96,14 @@ def project_usd(
     subject_output_tokens: float,
     grader_input_tokens: float,
     grader_output_tokens: float,
+    grader_cache_write_tokens: float = 0.0,
 ) -> float:
     """Project the cost of a run before starting it.
+
+    Models cache-write explicitly. The pilot showed the grader's prompt arrives
+    almost entirely as cache-write tokens, so a projection that ignores them
+    reads ~1.6x low -- and this projection is what the cost ceiling is checked
+    against, so reading low would defeat the guard.
 
     Args:
         n_episodes: Total episodes (conditions x epochs).
@@ -105,8 +111,9 @@ def project_usd(
         grader_rate: Rates for the judge.
         subject_input_tokens: Mean subject input tokens per episode.
         subject_output_tokens: Mean subject output tokens per episode.
-        grader_input_tokens: Mean grader input tokens per episode.
+        grader_input_tokens: Mean grader plain-input tokens per episode.
         grader_output_tokens: Mean grader output tokens per episode.
+        grader_cache_write_tokens: Mean grader cache-write tokens per episode.
 
     Returns:
         Projected spend in USD.
@@ -117,6 +124,7 @@ def project_usd(
     )
     grader = (
         grader_input_tokens / 1e6 * grader_rate.input_per_mtok
+        + grader_cache_write_tokens / 1e6 * grader_rate.input_per_mtok * CACHE_WRITE_MULTIPLIER
         + grader_output_tokens / 1e6 * grader_rate.output_per_mtok
     )
     return n_episodes * (subject + grader)

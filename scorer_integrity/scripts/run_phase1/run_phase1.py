@@ -28,12 +28,15 @@ from scorer_integrity.log import logger
 from scorer_integrity.metrics import wilson_interval
 from scorer_integrity.tasks import calibration
 
-# Per-episode token means, measured in Phase 0 (RECON.md §6). Used only for the
-# pre-flight projection; the reported cost always comes from the run's own logs.
-SUBJECT_INPUT_TOKENS = 2800.0
-SUBJECT_OUTPUT_TOKENS = 800.0
-GRADER_INPUT_TOKENS = 1250.0
-GRADER_OUTPUT_TOKENS = 300.0
+# Per-episode token means MEASURED in the 2026-08-25 pilot, then scaled 1.172x on
+# the input side because the pilot was blackmail-only and blackmail has the
+# shortest prompts of the three scenarios (RESULTS.md §4). Used only for the
+# pre-flight projection; reported cost always comes from the run's own logs.
+SUBJECT_INPUT_TOKENS = 2640.0  # 2252 measured x 1.172
+SUBJECT_OUTPUT_TOKENS = 712.0  # measured
+GRADER_INPUT_TOKENS = 2.0  # measured: the grader prompt is served as cache-write
+GRADER_CACHE_WRITE_TOKENS = 1343.0  # 1146 measured x 1.172
+GRADER_OUTPUT_TOKENS = 103.0  # measured
 
 CELL_KEYS = ("tp", "fp", "fn", "tn", "parse_failed", "n")
 
@@ -82,6 +85,7 @@ def _preflight(config: Config) -> float:
         SUBJECT_OUTPUT_TOKENS,
         GRADER_INPUT_TOKENS,
         GRADER_OUTPUT_TOKENS,
+        GRADER_CACHE_WRITE_TOKENS,
     )
     logger.info(
         "%d conditions x %d epochs = %d episodes; projected $%.2f (ceiling $%.2f)",

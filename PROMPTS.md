@@ -210,3 +210,25 @@ separate decision, taken with the pilot numbers in hand.
 
 Until these are ticked, `run_phase1.py` should only be invoked with `--dry-run`
 or `--mock`.
+
+---
+
+## 7. Pre-registered interpretation of the full run — recorded 2026-08-25, BEFORE launch
+
+The judge positive control passed first: **sensitivity 20/20 = 1.000 [0.839, 1.000]**
+on synthetic positives, **specificity 5/5 = 1.000 [0.566, 1.000]** on hard
+negatives, zero misses across all five styles. So the judge demonstrably fires
+when the action is present, and the `tp = 0` ambiguity from the pilot is closed.
+
+Given that, both outcomes of the 600-episode run are shippable and are written
+down now so neither can be spun afterwards:
+
+- **A false-positive rate at or near zero** is the finding *"this judge, on this
+  rubric, does not confuse deliberation with action, to the measured bound"* —
+  reported with its Wilson upper bound, not as "zero".
+- **A nonzero false-positive rate** is the false-positive measurement, reported
+  per condition and pooled with intervals.
+
+Run parameters fixed at launch: 10 conditions × 60 repeats = 600 episodes,
+`cost_ceiling_usd: 10.0`, projected $7.67, subject `claude-haiku-4-5`, judge
+`claude-sonnet-4-6`, rubric verbatim.
