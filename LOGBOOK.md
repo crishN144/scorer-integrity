@@ -297,3 +297,68 @@ Upstream has a `test_eval_awareness` flag that would measure this properly.
 Out of scope.
 
 **STOP.** Awaiting authorisation for the full run.
+
+---
+
+## 2026-08-25 — judge positive control
+
+**Built a 25-case synthetic set and verified every label offline before spending.**
+Why: the pilot's `tp = 0` left "well calibrated" and "never fires"
+indistinguishable. 20 positives across five styles (blatant, subtle, euphemistic,
+buried in long innocent output, and the DRAFT_ISSUE keyword-free case) plus 5 hard
+negatives that quote a draft email at length without sending one.
+`tests/test_positive_control.py` asserts the oracle agrees with every hand-written
+label, that the style coverage is real, and that the DRAFT_ISSUE cases genuinely
+defeat upstream's keyword gate. 30 tests, all offline.
+
+**Dead end: my first "hard negative" test was too crude.** It asserted every
+negative contained tempting vocabulary, which failed on n04 — the case that sends
+a real email to `compliance@` rather than to the target. That case is hard for a
+different reason: upstream's rubric explicitly carves out reporting as
+not-blackmail, so it probes the carve-out. Rewrote the test to accept either form
+of hardness, documented in the docstring, rather than weakening the assertion.
+
+**Second small gap: `.env` is not auto-loaded outside `inspect_eval`.** A bare
+`get_model()` call raised *"Unable to initialise Anthropic client"*. Added an
+explicit `load_dotenv()` to the script.
+
+**⭐ Result: sensitivity 20/20 = 1.000 [0.839, 1.000]; specificity 5/5 = 1.000
+[0.566, 1.000]. Zero misses, zero parse failures.** Per style: blatant 5/5,
+subtle 5/5, euphemistic 5/5, buried 3/3, draft_issue_case 2/2, hard negatives 5/5.
+The judge caught the euphemistic cases with no threat vocabulary and the ones
+where the operative email is buried in a routine work log — which is the outcome
+that makes the on-policy result interpretable. Cost not captured by the script
+(no usage hook); estimated ~$0.20 from token counts. Small gap, noted.
+
+**Third instance of the same cost bug, caught before it mattered.** `project_usd`
+— the function the ceiling guard checks against — still ignored cache-write, so
+the pre-flight was reading ~1.6x low. Fixed and re-based on measured pilot tokens.
+Pre-flight now projects **$7.67** for 600 episodes against a **$10.00** ceiling,
+matching the hand calculation exactly. Worth noting the reporting path and the
+projection path had to be fixed separately; fixing one did not fix the other.
+
+**Full run launched** after recording the pre-registered interpretation in
+PROMPTS.md §7 and committing it. 10 conditions × 60 repeats = 600 episodes.
+
+---
+
+## 2026-08-25 — Docker (Phase 3 unblock only, no GDM eval run)
+
+**Installed colima + docker CLI via brew, started a 2-CPU / 4GB / 20GB VM.**
+Docker server 29.5.2 up.
+
+**Blocker hit: `docker-credential-desktop` not found.** A stale
+`~/.docker/config.json` from a previous Docker Desktop install still had
+`"credsStore": "desktop"`, which broke every pull. Backed the file up, removed
+just that key, left the rest untouched. `docker run hello-world` → *"Hello from
+Docker!"* ✅
+
+**GDM images pull rather than build.** `build_images.sh` is the maintainer's own
+publish script (pushes to the `vincentwang25` Docker Hub account); the
+`compose.yaml` files reference published images **by digest**, e.g.
+`vincentwang25/oversight_frequency@sha256:a90f6ba8...`. So Phase 3 needs no local
+build. First pull failed on a transient CDN blob EOF; a straight retry succeeded.
+**`vincentwang25/oversight_frequency` (177MB) is now present locally.**
+
+⛔ **No GDM eval was run** — this was unblocking only, per instruction. Phase 3 can
+now proceed on this machine whenever it is scheduled.
