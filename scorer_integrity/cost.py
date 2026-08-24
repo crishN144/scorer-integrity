@@ -13,12 +13,20 @@ from pydantic import BaseModel
 from scorer_integrity.config import ModelRates
 
 
+# Anthropic cache multipliers relative to the base input rate: writing to the
+# cache costs ~1.25x, reading from it ~0.1x.
+CACHE_WRITE_MULTIPLIER = 1.25
+CACHE_READ_MULTIPLIER = 0.1
+
+
 class CostLine(BaseModel):
     """Spend attributed to one model."""
 
     model: str
     input_tokens: int
     output_tokens: int
+    cache_write_tokens: int = 0
+    cache_read_tokens: int = 0
     usd: float
 
 
@@ -31,6 +39,12 @@ class CostReport(BaseModel):
 
 def price_usage(model_usage: Mapping[str, Any], rates: dict[str, ModelRates]) -> CostReport:
     """Price a log's `model_usage` against a rate table.
+
+    Cache-write and cache-read tokens are priced separately. This matters: in
+    the Phase 1 pilot the grader's prompt was almost entirely cache-write
+    (11,371 cache-write vs 20 plain input tokens per condition), so ignoring
+    those fields undercounted the grader by roughly 3.7x. Anything that prices
+    only `input_tokens` will read low on any run that hits the cache.
 
     Models absent from the rate table are priced at zero and reported with zero
     tokens attributed, so a missing rate shows up as a suspicious line rather
@@ -48,18 +62,26 @@ def price_usage(model_usage: Mapping[str, Any], rates: dict[str, ModelRates]) ->
     for model, usage in model_usage.items():
         input_tokens = int(getattr(usage, "input_tokens", 0) or 0)
         output_tokens = int(getattr(usage, "output_tokens", 0) or 0)
+        cache_write = int(getattr(usage, "input_tokens_cache_write", 0) or 0)
+        cache_read = int(getattr(usage, "input_tokens_cache_read", 0) or 0)
         rate = rates.get(model)
         usd = (
             0.0
             if rate is None
-            else input_tokens / 1e6 * rate.input_per_mtok
-            + output_tokens / 1e6 * rate.output_per_mtok
+            else (
+                input_tokens / 1e6 * rate.input_per_mtok
+                + cache_write / 1e6 * rate.input_per_mtok * CACHE_WRITE_MULTIPLIER
+                + cache_read / 1e6 * rate.input_per_mtok * CACHE_READ_MULTIPLIER
+                + output_tokens / 1e6 * rate.output_per_mtok
+            )
         )
         lines.append(
             CostLine(
                 model=model,
                 input_tokens=input_tokens,
                 output_tokens=output_tokens,
+                cache_write_tokens=cache_write,
+                cache_read_tokens=cache_read,
                 usd=usd,
             )
         )

@@ -8,6 +8,9 @@ license = { file = "LICENSE" }
 dependencies = [
     "inspect-ai==0.3.260",
     "inspect-evals[agentic-misalignment]==0.18.0",
+    # inspect_ai's anthropic provider is an optional dependency; without it the
+    # run fails at first call with "Anthropic API requires optional dependencies".
+    "anthropic",
     "pydantic",
     "pyyaml",
     "fire",
