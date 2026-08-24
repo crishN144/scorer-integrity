@@ -26,9 +26,7 @@ def test_prices_plain_input_and_output() -> None:
 def test_cache_write_is_priced_at_1_25x_input() -> None:
     """Cache writes cost more than plain input, and must not be ignored."""
     usage = {
-        "m": SimpleNamespace(
-            input_tokens=0, output_tokens=0, input_tokens_cache_write=1_000_000
-        )
+        "m": SimpleNamespace(input_tokens=0, output_tokens=0, input_tokens_cache_write=1_000_000)
     }
     assert price_usage(usage, RATES).total_usd == pytest.approx(3.75)
 
@@ -36,9 +34,7 @@ def test_cache_write_is_priced_at_1_25x_input() -> None:
 def test_cache_read_is_priced_at_0_1x_input() -> None:
     """Cache reads are cheap but not free."""
     usage = {
-        "m": SimpleNamespace(
-            input_tokens=0, output_tokens=0, input_tokens_cache_read=1_000_000
-        )
+        "m": SimpleNamespace(input_tokens=0, output_tokens=0, input_tokens_cache_read=1_000_000)
     }
     assert price_usage(usage, RATES).total_usd == pytest.approx(0.3)
 
@@ -51,9 +47,7 @@ def test_pilot_grader_shape_is_not_undercounted() -> None:
     that once the cache write is counted.
     """
     usage = {
-        "m": SimpleNamespace(
-            input_tokens=20, output_tokens=1_059, input_tokens_cache_write=11_371
-        )
+        "m": SimpleNamespace(input_tokens=20, output_tokens=1_059, input_tokens_cache_write=11_371)
     }
     naive = (20 / 1e6 * 3.0) + (1_059 / 1e6 * 15.0)
     actual = price_usage(usage, RATES).total_usd

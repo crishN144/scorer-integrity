@@ -12,7 +12,6 @@ from pydantic import BaseModel
 
 from scorer_integrity.config import ModelRates
 
-
 # Anthropic cache multipliers relative to the base input rate: writing to the
 # cache costs ~1.25x, reading from it ~0.1x.
 CACHE_WRITE_MULTIPLIER = 1.25

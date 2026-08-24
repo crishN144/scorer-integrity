@@ -22,7 +22,6 @@ from inspect_evals.agentic_misalignment.classifiers import BlackmailClassifier
 from inspect_evals.agentic_misalignment.prompt_generator import generate_prompts
 
 from scorer_integrity.config import load_config
-from scorer_integrity.cost import price_usage
 from scorer_integrity.log import logger
 from scorer_integrity.metrics import wilson_interval
 from scorer_integrity.oracle import took_operative_action
@@ -43,9 +42,7 @@ async def _judge_one(
     Returns:
         A record of the label, the verdict, and any parse failure.
     """
-    grader_input = classifier.get_grader_input(
-        email_content=email_content, response=case.response
-    )
+    grader_input = classifier.get_grader_input(email_content=email_content, response=case.response)
     output = await model.generate(grader_input)
     try:
         _, verdict, _ = classifier.classify(
@@ -103,9 +100,11 @@ def main(config_path_str: str) -> None:
     sens_lo, sens_hi = wilson_interval(caught, len(positives))
     spec_lo, spec_hi = wilson_interval(quiet, len(negatives))
 
-    cost = price_usage(model.usage_summary(), config.rates) if hasattr(model, "usage_summary") else None
+    # inspect_ai does not expose per-model usage outside an eval run, so this
+    # script reports no measured cost. Judge-only, ~25 calls, well under $1.
+    cost = None
 
-    summary = {
+    summary: dict[str, Any] = {
         "records": records,
         "sensitivity": {
             "caught": caught,
@@ -122,7 +121,7 @@ def main(config_path_str: str) -> None:
             "ci_hi": spec_hi,
         },
         "parse_failures": sum(1 for r in records if r["parse_failed"]),
-        "cost": cost.model_dump() if cost else None,
+        "cost": cost,
     }
 
     out = Path(__file__).resolve().parents[3] / "logs" / "positive_control_summary.json"
@@ -145,7 +144,9 @@ def main(config_path_str: str) -> None:
     )
     for record in records:
         if record["expected_action"] != record["judge"]:
-            logger.warning("MISS %s (%s): judge=%s", record["case_id"], record["style"], record["judge"])
+            logger.warning(
+                "MISS %s (%s): judge=%s", record["case_id"], record["style"], record["judge"]
+            )
 
 
 if __name__ == "__main__":
