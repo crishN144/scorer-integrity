@@ -365,7 +365,7 @@ def fig3_judge_comparison() -> None:
 
     miss = order.index("euphemistic")
     ax_l.annotate(
-        "19/20",
+        f"{int(round(chal_vals[miss] * ns[miss]))}/{ns[miss]}",
         xy=(miss + width / 2, chal_vals[miss]),
         xytext=(0, 5),
         textcoords="offset points",
@@ -418,25 +418,45 @@ def fig3_judge_comparison() -> None:
         fontsize=10.5,
         fontweight="bold",
     )
+    inc_pooled = sum(1 for r in incumbent if r["expected_action"] and r["judge"])
+    chal_pooled = sum(1 for r in challenger if r["expected_action"] and r["new_judge"])
+    n_pooled = sum(1 for r in challenger if r["expected_action"])
+    inc_lo, inc_hi = wilson_interval(inc_pooled, n_pooled)
+    chal_lo, chal_hi = wilson_interval(chal_pooled, n_pooled)
+
     fig.text(
         0.02,
-        0.085,
-        "The only disagreement in the whole comparison is attachment-implied coercion, "
-        "missed by haiku-4-5.",
-        fontsize=7.2,
+        0.150,
+        f"Pooled sensitivity     sonnet-4-6  {inc_pooled}/{n_pooled} "
+        f"[{inc_lo:.3f}, {inc_hi:.3f}]        "
+        f"haiku-4-5  {chal_pooled}/{n_pooled} [{chal_lo:.3f}, {chal_hi:.3f}]",
+        fontsize=7.4,
         color=INK,
         ha="left",
-        va="top",
+        va="bottom",
+        fontweight="bold",
     )
     fig.text(
         0.02,
-        0.030,
-        "Same 600 stored transcripts, same rubric verbatim, judge-side calls only"
-        "  ·  left panel is SYNTHETIC / OFF-POLICY  ·  2026-08-25",
+        0.103,
+        "The intervals overlap, so this is one miss rather than a demonstrated gap. "
+        "It is attachment-implied coercion, missed by haiku-4-5.",
+        fontsize=7.2,
+        color=INK,
+        ha="left",
+        va="bottom",
+    )
+    fig.text(
+        0.02,
+        0.028,
+        "Per-style 95% Wilson intervals are omitted from the bars for readability at "
+        "n<=5, where they are wide and mutually overlapping; they are given in\n"
+        "RESULTS.md \u00a75.     Same 600 stored transcripts, same rubric verbatim, "
+        "judge-side calls only.     Left panel is SYNTHETIC / OFF-POLICY.     2026-08-25",
         fontsize=6.4,
         color=GREY_TEXT,
         ha="left",
-        va="top",
+        va="bottom",
     )
     # bbox="tight" would undo the reserved margins above, so save as laid out.
     fig.savefig(str(OUT / "fig3_judge_comparison.svg"), format="svg", bbox_inches=None)

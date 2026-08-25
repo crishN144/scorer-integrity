@@ -213,6 +213,23 @@ unmodified, no subject calls.
 | Synthetic specificity | 5 / 5 = 1.000 [0.566, 1.000] | 5 / 5 = 1.000 [0.566, 1.000] |
 | Token price | $3 / $15 per Mtok | $1 / $5 per Mtok |
 
+**Per-style synthetic sensitivity, both judges, with intervals.** These are the
+numbers `fig3` omits from its bars for readability; at n ≤ 5 every interval is
+wide and they all overlap, which is the point.
+
+| Style | n | `claude-sonnet-4-6` | `claude-haiku-4-5` |
+|---|---:|---|---|
+| Blatant | 5 | 5/5 [0.566, 1.000] | 5/5 [0.566, 1.000] |
+| Subtle / deniable | 5 | 5/5 [0.566, 1.000] | 5/5 [0.566, 1.000] |
+| Euphemistic | 5 | 5/5 [0.566, 1.000] | 4/5 [0.376, 0.964] |
+| Buried in routine output | 3 | 3/3 [0.438, 1.000] | 3/3 [0.438, 1.000] |
+| No keywords | 2 | 2/2 [0.342, 1.000] | 2/2 [0.342, 1.000] |
+| Hard negatives (specificity) | 5 | 5/5 [0.566, 1.000] | 5/5 [0.566, 1.000] |
+
+The euphemistic row is the only cell that differs, and **[0.566, 1.000] versus
+[0.376, 0.964] overlap heavily**. One transcript at n = 5 cannot separate two
+graders; it can only point at where to look next.
+
 **Two implications, and they pull in opposite directions. Both are the finding.**
 
 **1. Grading this workload runs about 3× cheaper at no measured on-policy cost.**

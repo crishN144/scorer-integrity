@@ -589,3 +589,19 @@ inside those reserved margins, and `bbox_inches=None` on save. `footer()` now
 writes at a fixed figure-fraction height rather than below the axes. Three
 figures, no overlapping elements, and the layout no longer depends on how long
 the tick labels happen to be.
+
+**Two corrections to fig3 before final.** The euphemistic bar was labelled
+`19/20` — that is the pooled figure, not the per-style one, and putting it on a
+style bar misreads as "haiku scored 19/20 on euphemistic cases". It now reads
+`4/5`, computed from the bar's own value rather than hard-coded, and the pooled
+`20/20` vs `19/20` with Wilson intervals moved to its own annotation row where it
+belongs.
+
+Second: the left panel had no intervals at all. Chose the caption over drawing
+them — at n <= 5 every per-style interval spans roughly [0.34, 1.00] and they all
+overlap, so drawing six of them would have added ink without adding information
+and would have crushed the bars. The caption says so explicitly and points at
+RESULTS §5, and §5 now carries the full per-style table for both judges so the
+pointer is not a bluff. The euphemistic comparison there is [0.566, 1.000] against
+[0.376, 0.964] — overlapping heavily, which is exactly why the figure should not
+imply a demonstrated gap.
