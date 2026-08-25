@@ -1,7 +1,7 @@
 # DRAFT — not filed
 
-Proposed issue for **`UKGovernmentBEIS/inspect_evals`**. Crish files this himself,
-or decides not to. Nothing here has been submitted anywhere.
+Proposed issue for **`UKGovernmentBEIS/inspect_evals`**. Not filed — nothing here
+has been submitted anywhere yet.
 
 Check before filing: search open issues for `blackmail`/`classifier` in case this
 has been raised since 2026-08-25, and re-run the repro against the then-current

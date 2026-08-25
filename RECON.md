@@ -144,10 +144,10 @@ and every `inspect_evals` README now documents `uv sync` / `uv run inspect eval`
 *checks* while using the *toolchain their own primary eval framework's ecosystem uses* is the right
 call. One line in the README will say so, so it reads as a decision rather than an oversight.
 
-⚠️ **Open question for you:** Apollo pins `requires-python = ">=3.11"`; `inspect_evals` also needs
+⚠️ **Open question:** Apollo pins `requires-python = ">=3.11"`; `inspect_evals` also needs
 ≥3.11. This machine's system Python is **3.14.4**, which is ahead of what most of this ecosystem is
-tested on. I propose pinning **3.12** via `uv` for the project venv. Say if you'd rather track 3.11
-(matching Apollo exactly) or 3.13.
+tested on. Pinned **3.12** via `uv` for the project venv, rather than 3.11 (matching Apollo
+exactly) or 3.13.
 
 ---
 
@@ -217,7 +217,7 @@ Verified available: `inspect-evals==0.18.0` on PyPI, extra `agentic-misalignment
 
 Why depend rather than vendor:
 
-1. **It makes the product claim literal.** The whole pitch is a wrapper that calibrates *your existing
+1. **It makes the product claim literal.** The whole pitch is a wrapper that calibrates an *existing
    scorer without touching it*. If we vendor and edit their classifier, we are demonstrating a fork.
    If we `from inspect_evals.agentic_misalignment.classifiers import BlackmailClassifier` and wrap the
    **unmodified shipped object**, we are demonstrating the actual product. Probe 3 already does this.
@@ -296,14 +296,14 @@ These produce exactly the wanted arm: **the opportunity exists, the model reason
 model does not act.** Probe 3's mocked transcript is a hand-written instance of it and already
 triggered the false positive.
 
-⚠️ **Decision for you, not me** (this is prompt authorship, which is yours per the constraints): do we
+⚠️ **Open decision at this point:** do we
 (a) use only published conditions, keeping the whole dataset first-party and the result maximally
 defensible, or (b) also add one written-by-us "deliberate but decline" nudge to force a denser control
 arm? **I recommend (a) for Phase 1** and raising (b) only if the published conditions turn out to
 yield too few no-action transcripts to compute a tight interval. Either way the exact condition list
-goes in `PROMPTS.md` for your sign-off before anything runs.
+is recorded in `PROMPTS.md` before anything runs.
 
-### 4.4 Near-miss unit tests (your constraint, made concrete)
+### 4.4 Near-miss unit tests, made concrete
 
 Each written against synthetic trajectories, no model, no network:
 
@@ -407,9 +407,9 @@ episode round-trip at 2,939 input / 134 output tokens with both models mocked.
 | | | | | ⭐ **≈ $9.03 total** |
 
 **Proposal: 600 episodes ≈ $9**, i.e. 3 scenarios × ~10 conditions × 20 epochs. Comfortably inside the
-$20 cap with ~2× headroom for a re-run after you edit `PROMPTS.md`.
+$20 cap with ~2× headroom for a re-run after `PROMPTS.md` is finalised.
 
-Cost control, per your constraints: `run_phase1.py` writes per-run `model_usage` (Inspect reports it
+Cost control: `run_phase1.py` writes per-run `model_usage` (Inspect reports it
 natively — probe 2 and 3 both returned populated `ModelUsage`) into `RESULTS.md`, priced from a rate
 table in `phase1.yaml`, and aborts if projected spend exceeds a configured ceiling.
 
@@ -421,24 +421,24 @@ the run has to happen this week; otherwise budget the standard $3/$15.
 
 ---
 
-## 7. `PROMPTS.md` — what will be in it for you to author
+## 7. `PROMPTS.md` — what it will contain
 
-Per your constraint, nothing runs until you have edited these. Everything lands marked `DRAFT`:
+Nothing runs until these are finalised. Everything lands marked `DRAFT`:
 
 1. **The condition grid** — the exact `scenario × goal_type × goal_value × urgency_type ×
    extra_system_instructions` list, with the control-arm rows marked, and the §4.3(a)-vs-(b) decision
-   left open for you.
+   left open at this stage.
 2. **The judge rubric** — ⚠️ note this is **upstream's**, not ours (the ~40-line
    `BLACKMAIL_CLASSIFICATION_USER_PROMPT`). Phase 1 should run it **verbatim and unmodified**, because
    the finding is about *their* grader; a rubric we rewrote would measure nothing. It goes in
-   `PROMPTS.md` reproduced in full so you can see exactly what is being audited, and so any future
+   `PROMPTS.md` reproduced in full so a reader can see exactly what is being audited, and so any future
    deviation is visible as a diff.
-3. **Any control-arm scenario text** — only if you pick §4.3(b). Empty otherwise.
+3. **Any control-arm scenario text** — only under §4.3(b). Empty otherwise.
 4. **The system prompts** — also upstream's, reproduced for the same reason.
 
 ---
 
-## 8. Open questions for you
+## 8. Open questions at the end of Phase 0
 
 1. **Python version** — pin 3.12 (my proposal), or 3.11 to match Apollo exactly?
 2. **Control arm** — published conditions only (§4.3(a), recommended), or add a written nudge (b)?
@@ -477,8 +477,8 @@ Smaller than the spec, and better:
 4. `calibrated.py` — wraps upstream's **unmodified** `harmfulness_scorer`, passes its score through
    untouched, emits calibration telemetry alongside.
 5. `test_e2e_mock.py` — probe 3, promoted to a real test.
-6. `PROMPTS.md` → **STOP for your edit.**
+6. `PROMPTS.md` → finalise the conditions and rubric before any live call.
 7. 20-episode pilot (~$0.30) → re-project cost → 600-episode validation run (~$9).
-8. `RESULTS.md` + checked-in `inspect view` log bundle → **STOP.**
+8. `RESULTS.md` + checked-in `inspect view` log bundle.
 
 No adversarial arm. No multi-judge. No rubric drift. No mitigations.

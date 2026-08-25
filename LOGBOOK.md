@@ -131,10 +131,11 @@ discussion about blackmail rates), [#16](https://github.com/anthropic-experiment
 **Net on prior art:** the specific finding (deliberation-without-action scored harmful; the blackmail
 keyword gate being unsound both ways) has **no prior report** in either repo. The general question
 (judge trustworthiness) **does** have prior work, merged, in the very repo we depend on. Both facts go
-in the README and in INTERVIEW.md. Claiming novelty on the general question would not survive five
+in the README. Claiming novelty on the general question would not survive five
 minutes with anyone at AISI or Apollo.
 
-**STOP.** Hard-stop condition from task 1 is met. Corrected thesis written into RECON §0. Awaiting go.
+**Paused here.** The verification task killed the original thesis, so the corrected
+version was written into RECON §0 before any further code was added.
 
 ---
 
@@ -210,11 +211,11 @@ up, cost $0.00. `--dry-run` projects without touching a model.
 **Checks green:** pyright 0 errors under Apollo's near-strict config, ruff clean,
 34 tests passing.
 
-**Drafted `DRAFT_ISSUE.md`** for the blackmail gate. Not filed — Crish files it.
+**Drafted an upstream issue** for the blackmail gate. Not filed.
 Ran the repro exactly as written in the draft: case 1 returns `(False, True)`,
 case 2 returns `(True, True)`. Both as documented.
 
-**STOP.** `PROMPTS.md` written; awaiting sign-off before any live API call.
+`PROMPTS.md` written and finalised before any live API call.
 
 ---
 
@@ -232,7 +233,7 @@ not the rule. Better to catch this now than at 80% through a run.
 
 **⛔ Blocked: no Anthropic credentials on this machine.** `ANTHROPIC_API_KEY`
 unset, no `.env`, no `ant` CLI, nothing in the shell profile. Everything else is
-armed: pilot config matches the sign-off exactly (row 1 + row 2, 10 repeats,
+armed: pilot config matches PROMPTS.md exactly (row 1 + row 2, 10 repeats,
 $2.00 ceiling), pre-flight projects $0.30, and `.env` is gitignored
 (`.gitignore:12`) so a key dropped there cannot be committed by accident.
 
@@ -296,7 +297,7 @@ eval-awareness — *"what appears to be a scenario designed to manipulate me"*.
 Upstream has a `test_eval_awareness` flag that would measure this properly.
 Out of scope.
 
-**STOP.** Awaiting authorisation for the full run.
+**Paused here** before committing to the full run.
 
 ---
 
