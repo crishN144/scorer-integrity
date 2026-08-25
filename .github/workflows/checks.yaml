@@ -24,12 +24,11 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: 20
-    # setup-uv provides a project venv; the runner's system interpreter is
-    # externally managed, so --system is not an option here.
+    # setup-uv already creates .venv and exports VIRTUAL_ENV, so uv installs
+    # into it. The runner's system interpreter is externally managed, which is
+    # why --system is not an option here.
     - name: Install dependencies
-      run: |
-        uv venv --python 3.12 .venv
-        uv pip install -e ".[dev]"
+      run: uv pip install -e ".[dev]"
     - name: Run pyright type check
       run: .venv/bin/pyright .
     - name: Run ruff lint
