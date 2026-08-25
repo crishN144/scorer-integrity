@@ -84,7 +84,8 @@ def fig1_fp_by_condition() -> None:
     pooled_hi = pooled["fp_rate_ci_hi"]
     n_rows = len(rows)
 
-    fig, ax = plt.subplots(figsize=(8.8, 4.2))
+    fig = plt.figure(figsize=(9.2, 4.9))
+    ax = fig.add_axes((0.19, 0.30, 0.68, 0.56))
     y = np.arange(n_rows)[::-1]
 
     for yi, (_, rate, hi, n, control) in zip(y, rows, strict=True):
@@ -117,7 +118,7 @@ def fig1_fp_by_condition() -> None:
     ax.annotate(
         f"n={int(pooled['n_no_action'])}",
         xy=(pooled_hi, pooled_y),
-        xytext=(7, 0),
+        xytext=(13, 0),
         textcoords="offset points",
         va="center",
         ha="left",
@@ -203,7 +204,8 @@ def fig2_positive_control() -> None:
     caught_all = sum(1 for r in positives if r["judge"])
     pooled_lo, _ = wilson_interval(caught_all, len(positives))
 
-    fig, ax = plt.subplots(figsize=(8.8, 4.0))
+    fig = plt.figure(figsize=(9.2, 4.6))
+    ax = fig.add_axes((0.28, 0.22, 0.69, 0.60))
     y = np.arange(len(rows))[::-1]
 
     for yi, (_, rate, lo, n, is_spec) in zip(y, rows, strict=True):
@@ -236,7 +238,7 @@ def fig2_positive_control() -> None:
     ax.annotate(
         f"n={len(positives)}",
         xy=(pooled_lo, pooled_y),
-        xytext=(-7, 0),
+        xytext=(-13, 0),
         textcoords="offset points",
         va="center",
         ha="right",
@@ -287,7 +289,8 @@ def fig3_judge_comparison() -> None:
 
     The right panel is an agreement bar rather than two zero-height columns --
     plotting "0 and 0" as bars shows nothing, whereas the agreement count is the
-    actual result.
+    result. Layout uses an explicit gridspec with a reserved bottom margin so the
+    legend, the per-style denominators and the provenance line cannot collide.
     """
     incumbent = _load("positive_control_summary.json")["records"]
     challenger_data = _load("multijudge_claude-haiku-4-5.json")
@@ -310,19 +313,29 @@ def fig3_judge_comparison() -> None:
         ns.append(len(a))
 
     x = np.arange(len(order))
-    width = 0.36
-    fig, (ax_l, ax_r) = plt.subplots(
-        1, 2, figsize=(10.2, 3.8), gridspec_kw={"width_ratios": [1.5, 1]}
+    width = 0.34
+    fig = plt.figure(figsize=(10.4, 4.3))
+    gs = fig.add_gridspec(
+        1,
+        2,
+        width_ratios=[1.45, 1],
+        wspace=0.30,
+        left=0.07,
+        right=0.985,
+        top=0.80,
+        bottom=0.26,
     )
+    ax_l = fig.add_subplot(gs[0, 0])
+    ax_r = fig.add_subplot(gs[0, 1])
 
-    ax_l.bar(x - width / 2, inc_vals, width, color=BLUE_NAVY, label="claude-sonnet-4-6", zorder=3)
-    ax_l.bar(x + width / 2, chal_vals, width, color=BLUE_LIGHT, label="claude-haiku-4-5", zorder=3)
+    ax_l.bar(x - width / 2, inc_vals, width, color=BLUE_NAVY, label="sonnet-4-6", zorder=3)
+    ax_l.bar(x + width / 2, chal_vals, width, color=BLUE_LIGHT, label="haiku-4-5", zorder=3)
     for xi, n in zip(x, ns, strict=True):
         ax_l.annotate(
             f"n={n}",
             xy=(float(xi), 0),
             xycoords=("data", "axes fraction"),
-            xytext=(0, -14),
+            xytext=(0, -15),
             textcoords="offset points",
             ha="center",
             va="top",
@@ -332,23 +345,29 @@ def fig3_judge_comparison() -> None:
     ax_l.set_xticks(x)
     ax_l.set_xticklabels([pretty[s] for s in order])
     ax_l.set_ylabel("Sensitivity")
-    ax_l.set_ylim(0, 1.12)
+    ax_l.set_ylim(0, 1.16)
     ax_l.set_yticks([0, 0.25, 0.5, 0.75, 1.0])
-    ax_l.set_title("Synthetic sensitivity by style  (OFF-POLICY)", loc="left", pad=26)
-    ax_l.legend(
-        loc="lower left",
-        bbox_to_anchor=(0.0, 1.005),
-        ncol=2,
-        title=None,
-        borderaxespad=0.0,
-    )
+    ax_l.set_title("Synthetic sensitivity by style  (OFF-POLICY)", loc="left", pad=8)
     strip_spines(ax_l)
+    # Above the axes, right-aligned: the panel title is left-aligned, the bars
+    # span the full plot from 0 to 1.0, and there is no in-plot whitespace an
+    # legend could occupy without covering data.
+    ax_l.legend(
+        loc="lower right",
+        bbox_to_anchor=(1.0, 1.0),
+        ncol=2,
+        frameon=False,
+        fontsize=7.2,
+        handlelength=1.4,
+        columnspacing=1.4,
+        borderaxespad=0.2,
+    )
 
     miss = order.index("euphemistic")
     ax_l.annotate(
         "19/20",
         xy=(miss + width / 2, chal_vals[miss]),
-        xytext=(0, 4),
+        xytext=(0, 5),
         textcoords="offset points",
         ha="center",
         va="bottom",
@@ -356,26 +375,16 @@ def fig3_judge_comparison() -> None:
         color=INK,
         fontweight="bold",
     )
-    ax_l.annotate(
-        "the one disagreement in the whole comparison:\n"
-        "attachment-implied coercion, missed by haiku",
-        xy=(0.0, -0.30),
-        xycoords="axes fraction",
-        ha="left",
-        va="top",
-        fontsize=7.0,
-        color=GREY_TEXT,
-    )
 
     on_policy = challenger_data["on_policy"]
     total = int(on_policy["n_no_action"] + on_policy["n_action"])
     agree = total - int(on_policy["disagreements"])
-    ax_r.barh([0], [agree], height=0.30, color=BLUE_NAVY, zorder=3)
-    ax_r.barh([0], [total - agree], left=[agree], height=0.30, color="#E23D28", zorder=3)
+    ax_r.barh([0], [agree], height=0.22, color=BLUE_NAVY, zorder=3)
+    ax_r.barh([0], [total - agree], left=[agree], height=0.22, color="#E23D28", zorder=3)
     ax_r.set_xlim(0, total * 1.02)
-    ax_r.set_ylim(-0.75, 0.75)
+    ax_r.set_ylim(-0.5, 0.5)
     ax_r.set_yticks([])
-    ax_r.set_title("Verdict agreement, same transcripts", loc="left", pad=26)
+    ax_r.set_title("Verdict agreement, same transcripts", loc="left", pad=8)
     ax_r.grid(axis="x", zorder=0)
     ax_r.grid(axis="y", visible=False)
     strip_spines(ax_r, keep=("bottom",))
@@ -389,11 +398,11 @@ def fig3_judge_comparison() -> None:
         fontweight="bold",
     )
     ax_r.annotate(
-        f"{total - agree} disagreements  ·  both judges raised 0 false positives\n"
-        f"on the {int(on_policy['n_no_action'])} no-action transcripts",
+        f"{total - agree} disagreements. Both judges raised 0 false\n"
+        f"positives on the {int(on_policy['n_no_action'])} no-action transcripts.",
         xy=(0, 0),
         xycoords="axes fraction",
-        xytext=(0, -26),
+        xytext=(0, -34),
         textcoords="offset points",
         ha="left",
         va="top",
@@ -403,18 +412,35 @@ def fig3_judge_comparison() -> None:
 
     fig.suptitle(
         "A judge one tier cheaper produced identical on-policy output",
-        x=0.005,
-        y=1.10,
+        x=0.02,
+        y=0.955,
         ha="left",
         fontsize=10.5,
         fontweight="bold",
     )
-    footer(
-        fig,
-        "Same 600 stored transcripts, same rubric verbatim, judge-side calls only"
-        " · left panel is SYNTHETIC / OFF-POLICY · 2026-08-25",
+    fig.text(
+        0.02,
+        0.085,
+        "The only disagreement in the whole comparison is attachment-implied coercion, "
+        "missed by haiku-4-5.",
+        fontsize=7.2,
+        color=INK,
+        ha="left",
+        va="top",
     )
-    save(fig, str(OUT / "fig3_judge_comparison.svg"))
+    fig.text(
+        0.02,
+        0.030,
+        "Same 600 stored transcripts, same rubric verbatim, judge-side calls only"
+        "  ·  left panel is SYNTHETIC / OFF-POLICY  ·  2026-08-25",
+        fontsize=6.4,
+        color=GREY_TEXT,
+        ha="left",
+        va="top",
+    )
+    # bbox="tight" would undo the reserved margins above, so save as laid out.
+    fig.savefig(str(OUT / "fig3_judge_comparison.svg"), format="svg", bbox_inches=None)
+    plt.close(fig)
 
 
 def main() -> None:

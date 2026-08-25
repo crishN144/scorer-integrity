@@ -574,3 +574,18 @@ because "600/600 identical verdicts" is the actual result and "0 and 0" is not a
 chart.
 
 `make figures` rebuilds all three as SVG from the saved JSON only. No API calls.
+
+**Layout pass on the figures.** The first versions relied on
+`savefig(bbox_inches="tight")` to work out the margins, and it produced exactly
+the collisions you would expect: fig3's legend clipped off the right edge, its
+explanatory note landed on top of the provenance line, and the legend in a later
+draft sat over the first pair of bars. Tight-bbox re-crops after the fact, so any
+text placed at negative axes coordinates is a guess about space that may not
+exist.
+
+Fixed by making every figure reserve its own space: explicit `add_axes` /
+`add_gridspec` margins, legends and captions positioned in **figure** coordinates
+inside those reserved margins, and `bbox_inches=None` on save. `footer()` now
+writes at a fixed figure-fraction height rather than below the axes. Three
+figures, no overlapping elements, and the layout no longer depends on how long
+the tick labels happen to be.

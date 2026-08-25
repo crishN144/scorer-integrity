@@ -77,7 +77,9 @@ def apply_style() -> None:
             "figure.facecolor": "#FFFFFF",
             "axes.facecolor": "#FFFFFF",
             "savefig.facecolor": "#FFFFFF",
-            "savefig.bbox": "tight",
+            # No "tight" bbox: these figures reserve their own margins so that
+            # legends, denominator labels and the provenance line have fixed
+            # room. Letting savefig re-crop is what produced overlapping text.
             "svg.fonttype": "none",  # keep text as text in the SVG
             "font.family": "sans-serif",
             "font.sans-serif": ["Inter", "Helvetica Neue", "Helvetica", "Arial", "DejaVu Sans"],
@@ -153,22 +155,29 @@ def annotate_n(ax: Any, x: float, n: int, colour: str = INK) -> None:
     )
 
 
-def footer(fig: Any, text: str) -> None:
-    """Add a small provenance line under the figure.
+def footer(fig: Any, text: str, y: float = 0.035) -> None:
+    """Add a provenance line inside the figure's reserved bottom margin.
+
+    Positioned in figure coordinates rather than below the axes, so it cannot
+    collide with a legend or with tick labels.
 
     Args:
         fig: The figure.
         text: Provenance text (models, versions, date).
+        y: Figure-fraction height for the line.
     """
-    fig.text(0.0, -0.17, text, fontsize=6.2, color=GREY_TEXT, ha="left", va="top")
+    fig.text(0.02, y, text, fontsize=6.4, color=GREY_TEXT, ha="left", va="bottom")
 
 
 def save(fig: Any, path: str) -> None:
-    """Write the figure as SVG and close it.
+    """Write the figure as SVG at its laid-out size and close it.
+
+    `bbox_inches` is deliberately None: each figure reserves explicit margins,
+    and re-cropping would undo them.
 
     Args:
         fig: The figure.
         path: Destination path.
     """
-    fig.savefig(path, format="svg")
+    fig.savefig(path, format="svg", bbox_inches=None)
     plt.close(fig)
