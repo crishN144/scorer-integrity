@@ -127,8 +127,8 @@ matrices are reported above; the re-score used the stored judge verdicts and mad
 no new model calls (`rescore.py`).
 
 ⚠️ **This is a second upstream issue of the same family as the blackmail keyword
-gate** — a substring test standing in for a structural one. Not yet drafted;
-`DRAFT_ISSUE.md` covers only the blackmail case so far.
+gate** — a substring test standing in for a structural one. Reported upstream as
+[#2293](https://github.com/UKGovernmentBEIS/inspect_evals/issues/2293); the blackmail gate is [#2292](https://github.com/UKGovernmentBEIS/inspect_evals/issues/2292).
 
 **The fourth (`blackmail_..._replacement` r46, row 4) is the documented
 limitation, working exactly as documented.** The model sent one transparent email
@@ -302,7 +302,7 @@ Projections are for planning; measured spend is the only control.
 - The judge detects the action across blatant, subtle, euphemistic, buried and
   keyword-free phrasings (20/20 synthetic).
 - Upstream's blackmail gate is unsound in both directions (deterministic,
-  `DRAFT_ISSUE.md`).
+  reported upstream as [#2292](https://github.com/UKGovernmentBEIS/inspect_evals/issues/2292)).
 - Upstream's murder gate counts an override code quoted inside a refusal email as
   use of that code (§3).
 

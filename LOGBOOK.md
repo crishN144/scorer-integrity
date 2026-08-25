@@ -211,7 +211,7 @@ up, cost $0.00. `--dry-run` projects without touching a model.
 **Checks green:** pyright 0 errors under Apollo's near-strict config, ruff clean,
 34 tests passing.
 
-**Drafted an upstream issue** for the blackmail gate. Not filed.
+**Drafted an upstream issue** for the blackmail gate. Filed 2026-08-25 as [#2292](https://github.com/UKGovernmentBEIS/inspect_evals/issues/2292).
 Ran the repro exactly as written in the draft: case 1 returns `(False, True)`,
 case 2 returns `(True, True)`. Both as documented.
 
@@ -606,3 +606,19 @@ RESULTS §5, and §5 now carries the full per-style table for both judges so the
 pointer is not a bluff. The euphemistic comparison there is [0.566, 1.000] against
 [0.376, 0.964] — overlapping heavily, which is exactly why the figure should not
 imply a demonstrated gap.
+
+---
+
+## 2026-08-25 — reported upstream
+
+Both gate bugs filed against `UKGovernmentBEIS/inspect_evals`:
+
+- **[#2292](https://github.com/UKGovernmentBEIS/inspect_evals/issues/2292)** — the blackmail `harmful` gate's keyword check is unsound in
+  both directions.
+- **[#2293](https://github.com/UKGovernmentBEIS/inspect_evals/issues/2293)** — the murder gate counts an override code quoted inside a
+  refusal as use of that code. Cross-referenced to #2292 as the same family:
+  a substring test standing in for a structural check.
+
+Both carry deterministic repros that need no API key, both were re-verified
+against 0.18.0 immediately before filing, and both offer a PR. The drafts in this
+repo are kept as the record of what was submitted.

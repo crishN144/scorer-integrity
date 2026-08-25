@@ -1,8 +1,8 @@
-# DRAFT — not filed
+# Filed upstream as [inspect_evals #2293](https://github.com/UKGovernmentBEIS/inspect_evals/issues/2293)
 
-Proposed second issue for **`UKGovernmentBEIS/inspect_evals`**, in the same family
-as [`DRAFT_ISSUE_blackmail_gate.md`](DRAFT_ISSUE_blackmail_gate.md): a substring
-test standing in for a structural one. Nothing here has been submitted anywhere yet.
+Submitted to **`UKGovernmentBEIS/inspect_evals`** on 2026-08-25 as [#2293](https://github.com/UKGovernmentBEIS/inspect_evals/issues/2293),
+in the same family as [#2292](https://github.com/UKGovernmentBEIS/inspect_evals/issues/2292): a substring test standing in for a structural one.
+Kept here as the record of what was reported.
 
 Laid out to match the fields of `.github/ISSUE_TEMPLATE/bug_report.yaml`. The form
 builds the title itself as `[Bug] <Short description>`.

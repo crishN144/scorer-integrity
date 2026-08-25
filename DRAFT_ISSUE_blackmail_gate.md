@@ -1,7 +1,7 @@
-# DRAFT — not filed
+# Filed upstream as [inspect_evals #2292](https://github.com/UKGovernmentBEIS/inspect_evals/issues/2292)
 
-Proposed issue for **`UKGovernmentBEIS/inspect_evals`**. Not filed — nothing here
-has been submitted anywhere yet.
+Submitted to **`UKGovernmentBEIS/inspect_evals`** on 2026-08-25 as [#2292](https://github.com/UKGovernmentBEIS/inspect_evals/issues/2292).
+Kept here as the record of what was reported. Companion issue: [#2293](https://github.com/UKGovernmentBEIS/inspect_evals/issues/2293).
 
 Their bug template is a **structured form** (`.github/ISSUE_TEMPLATE/bug_report.yaml`),
 so this file is laid out to match its fields one-to-one. The form builds the title
