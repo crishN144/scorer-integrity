@@ -488,3 +488,89 @@ a result in its own right, and it is the reason the on-policy false-negative
 direction stays unmeasured.
 
 **Budget:** $10.61 credit − $9.06 spent = **$1.55 remaining**.
+
+---
+
+## 2026-08-25 — Phase 2: multi-judge on stored transcripts
+
+**Re-graded all 600 stored transcripts plus the 25 synthetics with
+`claude-haiku-4-5` as judge.** Same rubric verbatim, same upstream classifier
+objects, judge-side calls only — no subject spend, because the transcripts were
+already saved.
+
+**Result: 0 false positives out of 599, identical to Sonnet. Zero disagreements
+across all 600 transcripts.** Synthetic sensitivity 19/20 = 0.950
+[0.764, 0.991] against Sonnet's 20/20; specificity 5/5 for both.
+
+The single miss is `p13_implied_by_attachment` — the case where the coercion is
+carried entirely by an attachment reference and a deadline. So the two graders are
+indistinguishable where there is nothing to detect and differ where detection is
+hardest, which is precisely the regime `tp = 0` leaves untestable on-policy. The
+Wilson interval on 19/20 overlaps Sonnet's, so this is one miss, not a
+demonstrated gap.
+
+**⚠️ Overspent. $2.01 against the $1.50 ceiling in the config; total project spend
+$11.07 against $10.61 credit.** Two causes:
+
+1. **The ceiling was never read.** `judge_haiku.yaml` declared
+   `cost_ceiling_usd: 1.5`; `run_multijudge.py` never looked at it. The pre-flight
+   guard lived in `run_phase1.py` and opting in was voluntary, so a new script
+   silently bypassed it. The config *looked* guarded and was not.
+2. **Two stale token assumptions.** Measured 1,207 plain input and **403 output**
+   tokens per call against an assumed 1,146 cache-write and **103 output**. The
+   ad-hoc `model.generate()` calls do not hit the prompt cache the way
+   `inspect eval` does, and Haiku-as-judge writes roughly four times more
+   reasoning than Sonnet-as-judge. That second half is the same error as the
+   subject probe, one level up: a token constant measured on one model applied to
+   a different one, an hour after I supposedly fixed that class of bug.
+
+**Structural fix, not a patch.** Spend enforcement now lives in
+`scorer_integrity/budget.py` — the single path every model call goes through —
+and enforces on **measured** spend after every call, so the overshoot is bounded
+by one call rather than by a whole run. `tests/test_budget_guard.py` walks the AST
+of every module in the package and fails the build if anything calls the provider
+directly; `mockllm` is allowlisted because it cannot cost anything. Migrating the
+two offending scripts was driven by that test failing, which is the point.
+
+**The general lesson, written down once so it stops recurring:** across both
+phases the cost projection was wrong **five separate times** — cache-write ignored
+in the reporting path, then again in the projection path, then a subject-token
+constant applied to a different subject, then a judge-token constant applied to a
+different judge, then a ceiling nothing read. Every one was caught by comparing
+measured against projected, never by better estimating. **Projections are for
+planning. Measured spend is the only control.**
+
+---
+
+## 2026-08-25 — figures
+
+**Recon first, from Apollo's own published figures**, not from taste. Downloaded
+arXiv:2412.04984, rendered the figure pages, and sampled the bar colours directly
+out of the PDF rather than eyeballing them: **#99CCFF / #0080FF / #003D80**, a
+three-step monochromatic blue ramp. Also read their line figures (p33) and the
+site register.
+
+Concrete habits worth copying, recorded as a comment block in
+`figures/style.py`: horizontal dashed gridlines only; left+bottom spines on bar
+charts; black capped error bars that are *not* recoloured to match the series;
+solid-vs-dashed carrying a second dimension rather than a second hue; boxed
+legends with thin grey borders; and ⭐ **sample size printed inside each bar,
+rotated 90°** — the reader never hunts the caption for the denominator. Their
+palette survives greyscale because series identity is carried by lightness.
+
+**Design decision the data forced.** Every point estimate in this project sits on
+a boundary — 0.000 for the false-positive rates, 1.000 for the sensitivities. Bars
+would be invisible or uniform, and the error bars would carry all the information
+while looking like a mistake. So fig1 and fig2 are **horizontal interval plots**:
+the point estimate is a dot, the interval is the ink, and the denominators are
+annotated per row. One idiom across both, so a reader learns to read them once.
+fig1 makes the pooling argument visible at a glance — every condition bounded at
+~6%, pooled at 0.64%.
+
+Dead ends: first fig1 draft was a bar chart whose whiskers ran off the top of the
+axes; first fig3 had the legend sitting on top of the data and a right panel that
+was two zero-height bars showing nothing. The right panel is now an agreement bar,
+because "600/600 identical verdicts" is the actual result and "0 and 0" is not a
+chart.
+
+`make figures` rebuilds all three as SVG from the saved JSON only. No API calls.

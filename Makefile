@@ -21,6 +21,10 @@ format:
 check:
 	SKIP=no-commit-to-branch pre-commit run -a --hook-stage commit
 
+.PHONY: figures
+figures:
+	python -m scorer_integrity.figures.build
+
 .PHONY: test
 test:
 	python -m pytest

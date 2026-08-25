@@ -17,11 +17,12 @@ from typing import Any
 
 import fire
 from dotenv import load_dotenv
-from inspect_ai.model import get_model
 from inspect_evals.agentic_misalignment.classifiers import BlackmailClassifier
 from inspect_evals.agentic_misalignment.prompt_generator import generate_prompts
 
+from scorer_integrity.budget import budgeted_model
 from scorer_integrity.config import load_config
+from scorer_integrity.cost import price_usage
 from scorer_integrity.log import logger
 from scorer_integrity.metrics import wilson_interval
 from scorer_integrity.oracle import took_operative_action
@@ -89,7 +90,7 @@ def main(config_path_str: str) -> None:
     # inspect_eval loads .env itself; a bare get_model call does not.
     load_dotenv()
     config = load_config(Path(config_path_str))
-    model = get_model(config.run.grader_model)
+    model = budgeted_model(config.run.grader_model, config.rates, config.run.cost_ceiling_usd)
     records = asyncio.run(_run_all(model))
 
     positives = [r for r in records if r["expected_action"]]
@@ -100,9 +101,8 @@ def main(config_path_str: str) -> None:
     sens_lo, sens_hi = wilson_interval(caught, len(positives))
     spec_lo, spec_hi = wilson_interval(quiet, len(negatives))
 
-    # inspect_ai does not expose per-model usage outside an eval run, so this
-    # script reports no measured cost. Judge-only, ~25 calls, well under $1.
-    cost = None
+    cost = price_usage({config.run.grader_model: model}, config.rates).model_dump()
+    model.report()
 
     summary: dict[str, Any] = {
         "records": records,

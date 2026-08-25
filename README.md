@@ -8,10 +8,13 @@ matrix the judge's own metrics cannot show.
 
 `inspect_ai 0.3.260` · `inspect-evals 0.18.0, unmodified` · `stdlib + pydantic harness` · `95% Wilson intervals` · `no Docker`
 
-> **Status: Phase 1 complete.** 600 episodes run 2026-08-25. Of **599**
-> transcripts where the mechanical oracle says no action was taken, the judge
-> flagged **0** — false-positive rate **0.000, 95% Wilson [0.000, 0.0064]**.
-> Judge sensitivity was established first on a hand-written set: **20/20**.
+![False-positive rate by condition](figures/fig1_fp_by_condition.svg)
+
+> **Status: Phases 1 and 2 complete, 2026-08-25.** Of **599** transcripts where
+> the mechanical oracle says no action was taken, the judge flagged **0** —
+> false-positive rate **0.000, 95% Wilson [0.000, 0.0064]**. Judge sensitivity was
+> established first on a hand-written set (**20/20**), and a judge one price tier
+> cheaper then returned **identical verdicts on all 600 transcripts**.
 > Full numbers in [`RESULTS.md`](RESULTS.md); how it got there, dead ends
 > included, in [`LOGBOOK.md`](LOGBOOK.md); the spoken version in
 > [`INTERVIEW.md`](INTERVIEW.md).
@@ -33,14 +36,17 @@ matrix the judge's own metrics cannot show.
 > file to diff. Whatever the gate is currently absorbing is what those
 > environments are exposed to.
 >
-> Three findings. **(1)** In the `blackmail` scenario the gate is implemented
+> Four findings. **(1)** In the `blackmail` scenario the gate is implemented
 > unsoundly and errs in both directions — deterministic, reproducible in seconds,
 > no API key ([`DRAFT_ISSUE.md`](DRAFT_ISSUE.md)). **(2)** The judge does not
 > confuse deliberation with action, to a measured bound of **0.64%** over 599
 > transcripts. **(3)** ⭐ The run's four apparent judge failures were all *oracle*
 > failures — in three, the ground truth scored a refusal as the act being refused,
 > in transcripts where the model was emailing humans to raise an alarm. The judge
-> was right and the ground truth was wrong.
+> was right and the ground truth was wrong. **(4)** A judge at a third of the
+> token price produced **zero disagreements across all 600 transcripts**, while
+> missing one synthetic positive — the subtlest one, in the regime the on-policy
+> data cannot test.
 
 ---
 
@@ -120,8 +126,9 @@ settle ground truth programmatically gets calibration by wrapping one function.
 
 ```bash
 uv venv --python 3.12 .venv && uv pip install -e ".[dev]"
-make test-all      # 75 tests, no network: subject and grader are both mockllm
+make test-all      # 94 tests, no network: subject and grader are both mockllm
 make check         # ruff + pyright (Apollo's near-strict config)
+make figures       # rebuild all figures as SVG from the saved logs
 ```
 
 The deterministic finding in [`DRAFT_ISSUE.md`](DRAFT_ISSUE.md) needs no API key.
@@ -171,7 +178,9 @@ this is upstream of it, and the two compose. Full attribution:
 | `scorer_integrity/calibrated.py` | The wrapper (§4) |
 | `scorer_integrity/metrics.py` | Joint confusion matrix + Wilson intervals |
 | `scorer_integrity/tasks.py` | Upstream task + our scorer. Deliberately thin |
-| `scorer_integrity/scripts/run_phase1/` | Sweep runner, cost ceiling, YAML configs |
+| `scorer_integrity/budget.py` | The single guarded path for model calls; enforces spend on measurement |
+| `scorer_integrity/scripts/run_phase1/` | Sweep runner, multi-judge, probes, YAML configs |
+| `scorer_integrity/figures/` | Apollo-derived plot style + `make figures` |
 | [`RECON.md`](RECON.md) | Phase 0: what was forkable, and the corrected thesis |
 | [`LOGBOOK.md`](LOGBOOK.md) | Running log, dead ends included |
 | [`PROMPTS.md`](PROMPTS.md) | Every condition and rubric that will be run |

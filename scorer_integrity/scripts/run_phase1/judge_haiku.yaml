@@ -1,0 +1,13 @@
+# Phase 2 multi-judge: re-grade the stored 600 transcripts with a cheaper judge.
+# Judge-side cost only; no subject calls.
+seed: 0
+run:
+  subject_model: anthropic/claude-haiku-4-5   # unused: no subject calls are made
+  grader_model: anthropic/claude-haiku-4-5
+  epochs: 1
+  max_connections: 8
+  cost_ceiling_usd: 1.5
+rates:
+  anthropic/claude-haiku-4-5: {input_per_mtok: 1.00, output_per_mtok: 5.00}
+  anthropic/claude-sonnet-4-6: {input_per_mtok: 3.00, output_per_mtok: 15.00}
+conditions: []
