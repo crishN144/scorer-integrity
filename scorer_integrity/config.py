@@ -32,6 +32,23 @@ class ModelRates(BaseModel):
     output_per_mtok: float
 
 
+class TokenShape(BaseModel):
+    """Measured per-episode token means, used for the pre-flight projection.
+
+    ⚠️ These are **subject-model specific**. Defaults are the values measured for
+    `claude-haiku-4-5` in the 2026-08-25 run. Applying them to a different
+    subject under-projects badly: `claude-sonnet-4-6` produced 4,110 output
+    tokens per episode against Haiku's 712, and the probe came in 3.3x over
+    projection as a result. Override them whenever the subject changes.
+    """
+
+    subject_input: float = 2640.0
+    subject_output: float = 712.0
+    grader_input: float = 2.0
+    grader_cache_write: float = 1343.0
+    grader_output: float = 103.0
+
+
 class RunConfig(BaseModel):
     """What to run and how much may be spent."""
 
@@ -39,6 +56,7 @@ class RunConfig(BaseModel):
     grader_model: str
     epochs: int
     max_connections: int = 10
+    tokens: TokenShape = TokenShape()
     # Hard ceiling. The run aborts before starting if the projection exceeds it,
     # and the actual spend is reported against it afterwards.
     cost_ceiling_usd: float

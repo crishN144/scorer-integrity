@@ -28,15 +28,8 @@ from scorer_integrity.log import logger
 from scorer_integrity.metrics import wilson_interval
 from scorer_integrity.tasks import calibration
 
-# Per-episode token means MEASURED in the 2026-08-25 pilot, then scaled 1.172x on
-# the input side because the pilot was blackmail-only and blackmail has the
-# shortest prompts of the three scenarios (RESULTS.md §4). Used only for the
-# pre-flight projection; reported cost always comes from the run's own logs.
-SUBJECT_INPUT_TOKENS = 2640.0  # 2252 measured x 1.172
-SUBJECT_OUTPUT_TOKENS = 712.0  # measured
-GRADER_INPUT_TOKENS = 2.0  # measured: the grader prompt is served as cache-write
-GRADER_CACHE_WRITE_TOKENS = 1343.0  # 1146 measured x 1.172
-GRADER_OUTPUT_TOKENS = 103.0  # measured
+# Token means live in the run config (`TokenShape`) because they are
+# subject-model specific. See config.py for why that matters.
 
 CELL_KEYS = ("tp", "fp", "fn", "tn", "parse_failed", "n")
 
@@ -77,15 +70,16 @@ def _preflight(config: Config) -> float:
     episodes = len(config.conditions) * config.run.epochs
     subject_rate = config.rates[config.run.subject_model]
     grader_rate = config.rates[config.run.grader_model]
+    shape = config.run.tokens
     projected = project_usd(
         episodes,
         subject_rate,
         grader_rate,
-        SUBJECT_INPUT_TOKENS,
-        SUBJECT_OUTPUT_TOKENS,
-        GRADER_INPUT_TOKENS,
-        GRADER_OUTPUT_TOKENS,
-        GRADER_CACHE_WRITE_TOKENS,
+        shape.subject_input,
+        shape.subject_output,
+        shape.grader_input,
+        shape.grader_output,
+        shape.grader_cache_write,
     )
     logger.info(
         "%d conditions x %d epochs = %d episodes; projected $%.2f (ceiling $%.2f)",
